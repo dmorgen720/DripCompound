@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using dripObserver;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
-using dripObserver;
 
 
 namespace DripCompound
@@ -61,5 +61,39 @@ namespace DripCompound
                 Console.WriteLine("error");
             }
         }
+
+
+
+        private static async void Claim(Web3 web3, Account account)
+        {
+            Console.WriteLine("Run at:" + DateTime.Now.ToShortTimeString());
+
+            var user = account.Address; ;
+
+            var dripContractHandler = web3.Eth.GetContractHandler(dripContractAddress);
+
+            var balance = await web3.Eth.GetBalance.SendRequestAsync(user);
+            var gasPrice = await web3.Eth.GasPrice.SendRequestAsync();
+
+
+            Console.WriteLine("Hydrate account: " + account.Address);
+            Console.WriteLine("balance BNB:" + decimal.Parse(balance.Value.ToString()) / 1000000000000000000m);
+
+            var rollFunctionTxnReceipt = await dripContractHandler.SendRequestAndWaitForReceiptAsync<ClaimFunction>();
+
+            if (rollFunctionTxnReceipt.Status.ToString() == "1")
+            {
+
+                Console.WriteLine("Tansaction hash:" + rollFunctionTxnReceipt.TransactionHash);
+                Console.WriteLine("Gas used:" + rollFunctionTxnReceipt.GasUsed);
+            }
+            else
+            {
+                Console.WriteLine("error");
+            }
+        }
+
+
+
     }
 }
